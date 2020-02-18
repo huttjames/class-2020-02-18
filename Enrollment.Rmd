@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
 library(readxl)
 library(janitor)
@@ -16,12 +17,29 @@ library(gt)
 ```{r enrollment, echo=FALSE}
 enrollment_data <- read_excel("class_enrollment_summary_by_term2.18.20.xlsx", skip = 3) %>%  
   clean_names() %>% 
-  filter(!is.na(course_name)) %>%
-  filter(course_department == "Government") %>% 
+  filter(!is.na(course_name)) 
+
+enrollment_data_old <- read_excel("class_enrollment_summary_by_term_3.22.19_0.xlsx", skip = 3) %>%  
+  clean_names() %>% 
+  filter(!is.na(course_name)) 
+
+enrollment_data %>%
+  filter(course_department == "Government") %>%
   select(course_title, course_name, u_grad) %>%
   arrange(-u_grad) %>% 
   slice(1:5) %>%
-  ggplot(aes(course_name, u_grad)) + geom_col()
+  gt()
+
+enrollment_data %>%
+  group_by(course_department) %>%
+  summarise(total = sum(total)) %>%
+  arrange(-total) %>%
+  slice(1:5) %>%
+  gt()
+
+enrollment_data %>%
+  anti_join(enrollment_data_old, by = "course_id") %>%
+  gt()
    
 ```
 
